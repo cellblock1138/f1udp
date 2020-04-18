@@ -1,0 +1,198 @@
+// Packet size – 1289 bytes >> 1237bytes per https://github.com/gmaslowski/f1game-telemetry/wiki/udp-packet-1237-structure
+
+struct UDPPacket
+
+{
+    float m_time; 0
+    float m_lapTime; 1
+    float m_lapDistance; 2
+    float m_totalDistance; 3
+    float m_x;  // World space position 4
+    float m_y;  // World space position 5
+    float m_z;  // World space position 6
+    float m_speed;  // Speed of car in meters per second!!! (NOT MPH... Idiots...) 7
+    float m_xv; // Velocity in world space 8
+    float m_yv; // Velocity in world space 9
+    float m_zv; // Velocity in world space 10 
+    float m_xr; // World space right direction 11
+    float m_yr; // World space right direction 12
+    float m_zr; // World space right direction 13
+    float m_xd; // World space forward direction 14
+    float m_yd; // World space forward direction 15
+    float m_zd; // World space forward direction 16
+    float m_susp_pos[4]; 17,18,19,20
+    float m_susp_vel[4]; // RL, RR, FL, FR 21,22,23,24
+    float m_wheel_speed[4]; 25,26,27,28
+    float m_throttle; 29
+    float m_steer; 30
+    float m_brake; 31
+    float m_clutch; 31
+    float m_gear; 33
+    float m_gforce_lat; 34
+    float m_gforce_lon; 35
+    float m_lap;  // Zero indexed it appears so +1 36
+    float m_engineRate; 37
+    float m_sli_pro_native_support; // SLI Pro support 38
+    float m_car_position;   // car race position 39 
+    float m_kers_level; // kers energy left 40
+    float m_kers_max_level; // kers maximum energy 41
+    float m_drs;    // 0 = off, 1 = on 42
+    float m_traction_control;   // 0 (off) - 2 (high) 43
+    float m_anti_lock_brakes;   // 0 (off) - 1 (on) 44
+    float m_fuel_in_tank;   // current fuel mass 45
+    float m_fuel_capacity;  // fuel capacity 46
+    float m_in_pits;    // 0 = none, 1 = pitting, 2 = in pit area 47
+    float m_sector; // 0 = sector1, 1 = sector2, 2 = sector3 48
+    float m_sector1_time;   // time of sector1 (or 0) 49
+    float m_sector2_time;   // time of sector2 (or 0) 50
+    float m_brakes_temp[4]; // brakes temperature (centigrade) 51,52,53,54
+    float m_tyres_pressure[4];  // tyres pressure PSI 55,56,57,58
+    float m_team_info;  // team ID 59
+    float m_total_laps; // total number of laps in this race 60
+    float m_track_size; // track size meters 61
+    float m_last_lap_time;  // last lap time 62
+    float m_max_rpm;    // cars max RPM, at which point the rev limiter will kick in 63
+    float m_idle_rpm;   // cars idle RPM 64
+    float m_max_gears;  // maximum number of gears 65
+    float m_sessionType;    // 0 = unknown, 1 = practice, 2 = qualifying, 3 = race 66
+    float m_drsAllowed; // 0 = not allowed, 1 = allowed, -1 = invalid / unknown 67
+    float m_track_number;   // -1 for unknown, 0-21 for tracks 68
+    float m_vehicleFIAFlags;    // -1 = invalid/unknown, 0 = none, 1 = green, 2 = blue, 3 = yellow, 4 = red 69
+    float m_era; // era, 2017 (modern) or 1980 (classic) 70
+    float m_engine_temperature; // engine temperature (centigrade) 71
+    float m_gforce_vert; // vertical g-force component 72
+    float m_ang_vel_x;  // angular velocity x-component 73
+    float m_ang_vel_y;  // angular velocity y-component 74
+    float m_ang_vel_z;  // angular velocity z-component 75
+    byte  m_tyres_temperature[4];   // tyres temperature (centigrade) 76,77,78,79
+    byte  m_tyres_wear[4];  // tyre wear percentage 80,81,82,83
+    byte  m_tyre_compound;  // compound of tyre – 0 = ultra soft, 1 = super soft, 2 = soft, 3 = medium, 4 = hard, 5 = inter, 6 = wet 84
+    byte  m_front_brake_bias; // front brake bias (percentage) 85
+    byte  m_fuel_mix; // fuel mix - 0 = lean, 1 = standard, 2 = rich, 3 = max 86
+    byte  m_currentLapInvalid;      // current lap invalid - 0 = valid, 1 = invalid 87
+    byte  m_tyres_damage[4];    // tyre damage (percentage) 88,89,90,91
+    byte  m_front_left_wing_damage; // front left wing damage (percentage) 92
+    byte  m_front_right_wing_damage;    // front right wing damage (percentage) 93
+    byte  m_rear_wing_damage;   // rear wing damage (percentage) 94
+    byte  m_engine_damage;  // engine damage (percentage) 95
+    byte  m_gear_box_damage;    // gear box damage (percentage) 96
+    byte  m_exhaust_damage; // exhaust damage (percentage) 97
+    byte  m_pit_limiter_status; // pit limiter status – 0 = off, 1 = on 98
+    byte  m_pit_speed_limit;    // pit speed limit in mph 99
+    float m_session_time_left;  // NEW: time left in session in seconds 100 
+    byte  m_rev_lights_percent;  // NEW: rev lights indicator (percentage) 101
+    byte  m_is_spectating;  // NEW: whether the player is spectating 102
+    byte  m_spectator_car_index;  // NEW: index of the car being spectated 103
+
+
+
+    // Car data
+    byte  m_num_cars; // number of cars in data 104 
+    byte  m_player_car_index; // index of player's car in the array 105 
+    CarUDPData  m_car_data[20]; // data for all cars on track
+    float m_yaw;  // NEW (v1.8)
+    float m_pitch;  // NEW (v1.8)
+    float m_roll;  // NEW (v1.8)
+    float m_x_local_velocity;          // NEW (v1.8) Velocity in local space
+    float m_y_local_velocity;          // NEW (v1.8) Velocity in local space
+    float m_z_local_velocity;          // NEW (v1.8) Velocity in local space
+    float m_susp_acceleration[4];   // NEW (v1.8) RL, RR, FL, FR
+    float m_ang_acc_x;                 // NEW (v1.8) angular acceleration x-component
+    float m_ang_acc_y;                 // NEW (v1.8) angular acceleration y-component
+    float m_ang_acc_z;                 // NEW (v1.8) angular acceleration z-component
+};
+
+
+
+struct CarUDPData
+
+{
+    float m_worldPosition[3]; // world co-ordinates of vehicle
+    float m_lastLapTime;
+    float m_currentLapTime;
+    float m_bestLapTime;
+    float m_sector1Time;
+    float m_sector2Time;
+    float m_lapDistance;
+    byte  m_driverId;
+    byte  m_teamId;
+    byte  m_carPosition;     // UPDATED: track positions of vehicle
+    byte  m_currentLapNum;
+    byte  m_tyreCompound;   // compound of tyre – 0 = ultra soft, 1 = super soft, 2 = soft, 3 = medium, 4 = hard, 5 = inter, 6 = wet
+    byte  m_inPits;           // 0 = none, 1 = pitting, 2 = in pit area
+    byte  m_sector;           // 0 = sector1, 1 = sector2, 2 = sector3
+    byte  m_currentLapInvalid; // current lap invalid - 0 = valid, 1 = invalid
+    byte  m_penalties;  // NEW: accumulated time penalties in seconds to be added
+};
+
+///////////////////////////////////////////////////
+
+(76f)
+17 float = 68
+float[4] = 16
+float[4] = 16
+float[4] = 16
+22 float = 88
+float[4] = 16
+float[4] = 16
+17 float = 68
+
+(21c)
+byte[4] = 4
+byte[4] = 4
+13 byte = 13
+
+(f)
+float = 4
+
+(5c)
+5 byte = 5
+
+CarUDPData struct[20] (9f9c)
+
+(13f)
+6 float = 24
+float[4] = 16
+3 float = 12
+
+END!!!!!!!!!
+################################
+CarUDPData
+(9f9c)
+float[3] = 12
+6 float = 24
+9 byte = 9
+
+431 bytes total without accounting for CarUDPData[20] padding (if any)
+
+
+////////////////////////////////////////////
+Compact form
+76 float
+21 byte
+1 float
+5 byte
+CarUDPData[20]
+13 float
+
+Python Struct Format String
+OLD: '<76f21cf5c9f9c13f858x'
+
+NEW: 
+'<76f21bf5b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b9f9b13f3x'
+
+NEWER
+'<76f24bf5b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b7f9b10f172x'
+
+76f
+24b
+f
+5b
+
+car x 20
+7f9b
+
+10f
+
+
+

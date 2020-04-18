@@ -1,0 +1,212 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Flask-SocketIO Test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+
+    <!-- <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.4/socket.io.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+            // Use a "/test" namespace.
+            // An application can open a connection on multiple namespaces, and
+            // Socket.IO will multiplex all those connections on a single
+            // physical channel. If you don't care about multiple channels, you
+            // can set the namespace to an empty string.
+            namespace = '/test';
+
+            // Connect to the Socket.IO server.
+            // The connection URL has the following format:
+            //     http[s]://<domain>:<port>[/<namespace>]
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+
+            // Event handler for new connections.
+            // The callback function is invoked when a connection with the
+            // server is established.
+            socket.on('connect', function() {
+                socket.emit('my_event', {data: 'I\'m connected!'});
+                console.log("on.connect finished")
+            });
+
+            // Event handler for server sent data.
+            // The callback function is invoked whenever the server emits data
+            // to the client. The data is then displayed in the "Received"
+            // section of the page.
+            socket.on('my_response', function(msg) {
+                // $('#log').html('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
+                //$('#tach').attr('aria-valuenow', msg.data);
+                $('#tach').css('width', msg.rpm+'%').attr('aria-valuenow', msg.rpm);
+                $('#throttle').css('width', msg.throttle+'%').attr('aria-valuenow', msg.throttle);
+                $('#brake').css('width', msg.brake+'%').attr('aria-valuenow', msg.brake);
+                $('#gear').text(msg.gear);
+                $('#speed').text(msg.speed);
+
+                console.log(msg)
+
+            });
+
+            // Interval function that tests message latency by sending a "ping"
+            // message. The server then responds with a "pong" message and the
+            // round trip time is measured.
+            var ping_pong_times = [];
+            var start_time;
+            window.setInterval(function() {
+                start_time = (new Date).getTime();
+                socket.emit('my_ping');
+            }, 1000);
+
+            // Handler for the "pong" message. When the pong is received, the
+            // time from the ping is stored, and the average of the last 30
+            // samples is average and displayed.
+            socket.on('my_pong', function() {
+                var latency = (new Date).getTime() - start_time;
+                ping_pong_times.push(latency);
+                ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples
+                var sum = 0;
+                for (var i = 0; i < ping_pong_times.length; i++)
+                    sum += ping_pong_times[i];
+                $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
+            });
+
+            // Handlers for the different forms in the page.
+            // These accept data from the user and send it to the server in a
+            // variety of ways
+            $('form#emit').submit(function(event) {
+                socket.emit('my_event', {data: $('#emit_data').val()});
+                return false;
+            });
+            $('form#broadcast').submit(function(event) {
+                socket.emit('my_broadcast_event', {data: $('#broadcast_data').val()});
+                return false;
+            });
+            $('form#join').submit(function(event) {
+                socket.emit('join', {room: $('#join_room').val()});
+                return false;
+            });
+            $('form#leave').submit(function(event) {
+                socket.emit('leave', {room: $('#leave_room').val()});
+                return false;
+            });
+            $('form#send_room').submit(function(event) {
+                socket.emit('my_room_event', {room: $('#room_name').val(), data: $('#room_data').val()});
+                return false;
+            });
+            $('form#close').submit(function(event) {
+                socket.emit('close_room', {room: $('#close_room').val()});
+                return false;
+            });
+            $('form#disconnect').submit(function(event) {
+                socket.emit('disconnect_request');
+                return false;
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container-fluid">
+
+        <h1>Flask-SocketIO Test</h1>
+        <p>Async mode is: <b>{{ async_mode }}</b></p>
+        <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
+        <!-- <h2>Send:</h2>
+        <form id="emit" method="POST" action='#'>
+            <div class="form-group">
+                <input type="text" name="emit_data" id="emit_data" class="form-control" placeholder="Message">
+                <button type="submit" class="btn btn-primary">Echo</button>
+            </div>
+        </form>
+        <form id="broadcast" class="form" method="POST" action='#'>
+            <div class="form-group">
+                <input type="text" name="broadcast_data" id="broadcast_data" class="form-control" placeholder="Message">
+                <button type="submit" class="btn btn-primary">Broadcast</button>
+            </div>
+        </form>
+        <form id="join" class="form" method="POST" action='#'>
+            <div class="form-group">
+                <input type="text" name="join_room" id="join_room" class="form-control" placeholder="Room Name">
+                <button type="submit" class="btn btn-primary">Join Room</button>
+            </div>
+        </form>
+        <form id="leave" class="form" method="POST" action='#'>
+            <div class="form-group">
+                <input type="text" name="leave_room" id="leave_room" class="form-control" placeholder="Room Name">
+                <button type="submit" class="btn btn-primary">Leave Room</button>
+            </div>
+        </form>
+        <form id="send_room" class="form" method="POST" action='#'>
+            <div class="form-group">
+                <input type="text" name="room_name" id="room_name" class="form-control" placeholder="Room Name">
+                <input type="text" name="room_data" id="room_data" class="form-control" placeholder="Message">
+                <button type="submit" class="btn btn-primary">Send to room</button>
+            </div>
+        </form>
+        <form id="close" class="form" method="POST" action="#">
+            <div class="form-group">
+                <input type="text" name="close_room" id="close_room" class="form-control" placeholder="Room Name">
+                <button type="submit" class="btn btn-primary">Close room</button>
+            </div>
+        </form>
+        <form id="disconnect" class="form" method="POST" action="#">
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Disconnect</button>
+            </div>
+        </form> -->
+        <h2>Receive:</h2>
+        <div id="log"></div>
+        <div class="row">
+            <div class="col-sm">
+                <h1 class="text-center">Gear</h1>
+                <h1 id="gear" class="text-center" style="font-size: 200px">N</h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-1">
+                <h4>RPM</h4>
+            </div>
+            <div class="col-lg-11">
+                <div class="progress" style="height: 25px;">
+                    <div id="tach" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="4000" aria-valuemin="0" aria-valuemax="20000"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-1">
+                <h4>Throttle</h4>
+            </div>
+            <div class="col-lg-11">
+                <div class="progress">
+                    <div id="throttle" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="1"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-1">
+                <h4>Brake</h4>
+            </div>
+            <div class="col-lg-11">
+                <div class="progress">
+                    <div id="brake" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="1"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <h4 id="speed">Speed</h1>
+            </div>
+        </div>
+    </div>
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+
+
+</body>
+</html>
